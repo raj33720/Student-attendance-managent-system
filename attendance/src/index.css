@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animated background blob keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  33% { transform: translateY(-20px) translateX(10px); }
+  66% { transform: translateY(10px) translateX(-10px); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translateX(0px); }
+  50% { transform: translateX(20px); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@layer base {
+  :root {
+    --ink: 15 23 42;
+    --ink-soft: 71 85 105;
+    --line: 203 213 225;
+    --card: 255 255 255;
+    --primary: 59 130 246;
+    --primary-strong: 37 99 235;
+    --secondary: 236 72 153;
+    --accent: 34 197 94;
+  }
+
+  html {
+    font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  body {
+    @apply antialiased text-slate-900 bg-gray-100;
+    min-height: 100vh;
+    background: #f3f4f6;
+    position: relative;
+    overflow-x: hidden;
+  }
+  /* Subtle decorative blobs for light theme */
+  body::before {
+    content: '';
+    position: fixed;
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -80px;
+    left: -80px;
+    animation: float 8s ease-in-out infinite;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle, rgba(240,147,251,0.05) 0%, transparent 70%);
+    border-radius: 50%;
+    bottom: -120px;
+    right: -120px;
+    animation: drift 10s ease-in-out infinite;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Space Grotesk", "Outfit", ui-sans-serif, sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white border border-gray-200 rounded-3xl shadow-sm;
+    background: #ffffff;
+    transition: all 0.18s ease;
+  }
+
+  .glass-panel:hover {
+    @apply shadow-md;
+    transform: translateY(-3px);
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-semibold text-slate-900;
+  }
+
+  .subtle-text {
+    @apply text-sm text-slate-600;
+  }
+
+  .primary-btn {
+    @apply px-6 py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-xl transition-all duration-200 shadow;
+  }
+
+  /* Enhanced input styling for light backgrounds */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea {
+    @apply bg-white border border-gray-200 text-slate-900 placeholder-gray-400;
+    transition: all 0.2s ease;
+  }
+
+  input[type="text"]::placeholder,
+  input[type="email"]::placeholder,
+  input[type="password"]::placeholder,
+  input[type="date"]::placeholder,
+  select option {
+    @apply text-gray-400;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="date"]:focus,
+  select:focus,
+  textarea:focus {
+    @apply outline-none ring-2 ring-emerald-200 bg-white border-gray-300;
+  }
+}
+
+  .primary-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-white font-medium shadow-md transition;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+
+  .primary-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px -18px rgba(6, 95, 70, 0.12);
+  }
+
+  .ghost-btn {
+    @apply inline-flex items-center justify-center rounded-full px-5 py-2 text-slate-900 border border-slate-300 hover:border-slate-400 hover:bg-white/75 transition;
+  }
+
+  .table-head {
+    @apply bg-cyan-50/80 text-slate-700 text-sm font-semibold;
+  }
+
+  .card-hover {
+    @apply transition duration-300 hover:-translate-y-1;
+  }
+
+  .surface {
+    @apply bg-white/75 border border-white rounded-3xl shadow-[0_15px_45px_-30px_rgba(15,23,42,0.65)];
+  }
+
+  .accent-badge {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700 bg-cyan-100;
+  }
