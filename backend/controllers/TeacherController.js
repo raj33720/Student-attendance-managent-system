@@ -21,6 +21,91 @@ const {
 
 const secretKey = process.env.SECRET_KEY;
 const tokenExpiry = process.env.JWT_EXPIRES_IN || '12h';
+const DEFAULT_STUDENT_PASSWORD = 'student123';
+
+const compactHeader = (value) =>
+    normalizeLower(value).replace(/[^a-z0-9]/g, '');
+
+const HEADER_MAP = {
+    name: ['name', 'studentname', 'fullname'],
+    roll: ['roll', 'rollno', 'rollnumber', 'enrollment', 'enrollmentno', 'enrollmentnumber'],
+    email: ['email', 'mail'],
+    contact: ['contact', 'contactno', 'contactnumber', 'phone', 'mobile'],
+    course: ['course', 'program'],
+    year: ['year'],
+    semester: ['semester', 'sem'],
+    branch: ['branch', 'department', 'dept'],
+    password: ['password', 'pass']
+};
+
+const toCanonicalHeader = (header) => {
+    const compact = compactHeader(header);
+    if (!compact) return '';
+    for (const [canonical, aliases] of Object.entries(HEADER_MAP)) {
+        if (aliases.includes(compact)) {
+            return canonical;
+        }
+    }
+    return '';
+};
+
+const parseCsvLine = (line) => {
+    const cells = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+                current += '"';
+                i += 1;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (ch === ',' && !inQuotes) {
+            cells.push(current.trim());
+            current = '';
+        } else {
+            current += ch;
+        }
+    }
+    cells.push(current.trim());
+    return cells;
+};
+
+const parseCsvContent = (csvContent) => {
+    const lines = csvContent
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+    if (!lines.length) {
+        return { headers: [], rows: [] };
+    }
+
+    const rawHeaders = parseCsvLine(lines[0]).map((header) =>
+        normalizeText(header).replace(/^\uFEFF/, '')
+    );
+    const headers = rawHeaders.map((header) => toCanonicalHeader(header));
+
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+        const values = parseCsvLine(lines[i]);
+        const row = {};
+        headers.forEach((header, index) => {
+            if (!header) return;
+            row[header] = normalizeText(values[index] || '');
+        });
+
+        const hasSomeData = Object.values(row).some((v) => !!normalizeText(v));
+        if (hasSomeData) {
+            rows.push({ lineNumber: i + 1, row });
+        }
+    }
+
+    return { headers, rows };
+};
 
 module.exports.registerTeacher = async (req, res) => {
     const { name, email, contact, branch, password } = req.body;
@@ -74,6 +159,145 @@ module.exports.loginTeacher = async (req, res) => {
         return res.status(500).json({ "msg": "Database error" });
     }
 }
+
+module.exports.uploadStudentsCsv = async (req, res) => {
+    const { csvContent, defaultCourse, defaultYear, defaultSemester, defaultBranch } = req.body;
+
+    if (!normalizeText(csvContent)) {
+        return res.status(400).json({ msg: 'CSV content is required.' });
+    }
+
+    const { headers, rows } = parseCsvContent(csvContent);
+    if (!rows.length) {
+        return res.status(400).json({ msg: 'CSV has no data rows.' });
+    }
+
+    const missingColumns = [];
+    if (!headers.includes('name')) missingColumns.push('name');
+    if (!headers.includes('roll')) missingColumns.push('roll');
+    if (missingColumns.length) {
+        return res.status(400).json({
+            msg: `Missing required CSV column(s): ${missingColumns.join(', ')}`
+        });
+    }
+
+    try {
+        const teacher = await Teacher.findById(req.user?.id).select('branch').lean();
+        const teacherBranch = canonicalBranch(teacher?.branch) || normalizeText(teacher?.branch);
+
+        const normalizedDefaultCourse = canonicalCourse(defaultCourse) || normalizeLower(defaultCourse);
+        const normalizedDefaultYear = normalizeYearOrSemester(defaultYear);
+        const normalizedDefaultSemester = normalizeYearOrSemester(defaultSemester);
+        const normalizedDefaultBranch =
+            canonicalBranch(defaultBranch) ||
+            normalizeText(defaultBranch) ||
+            teacherBranch;
+
+        const preparedRows = [];
+        const failedRows = [];
+
+        rows.forEach(({ lineNumber, row }) => {
+            const name = normalizeText(row.name);
+            const roll = normalizeRoll(row.roll);
+            const course = canonicalCourse(row.course) || normalizeLower(row.course) || normalizedDefaultCourse;
+            const year = normalizeYearOrSemester(row.year) || normalizedDefaultYear;
+            const semester = normalizeYearOrSemester(row.semester) || normalizedDefaultSemester;
+            const branch =
+                canonicalBranch(row.branch) ||
+                normalizeText(row.branch) ||
+                normalizedDefaultBranch;
+            const email =
+                normalizeLower(row.email) ||
+                `${normalizeLower(roll).replace(/[^a-z0-9]/g, '') || 'student'}@example.edu`;
+            const contact = normalizeText(row.contact) || '9999999999';
+            const password = normalizeText(row.password) || DEFAULT_STUDENT_PASSWORD;
+
+            if (!name || !roll || !course || !year || !semester || !branch) {
+                failedRows.push({
+                    lineNumber,
+                    roll: roll || '-',
+                    reason: 'Missing required values after applying defaults.'
+                });
+                return;
+            }
+
+            preparedRows.push({
+                lineNumber,
+                doc: { name, roll, email, contact, course, year, semester, branch, password }
+            });
+        });
+
+        if (!preparedRows.length) {
+            return res.status(400).json({
+                msg: 'No valid rows found in CSV.',
+                summary: {
+                    totalRows: rows.length,
+                    insertedCount: 0,
+                    failedCount: failedRows.length,
+                    duplicateCount: 0
+                },
+                failedRows
+            });
+        }
+
+        const uniqueRolls = [...new Set(preparedRows.map((entry) => entry.doc.roll))];
+        const existingStudents = uniqueRolls.length
+            ? await Student.find({ $or: uniqueRolls.map((roll) => ({ roll: exactCI(roll) })) })
+                .select('roll')
+                .lean()
+            : [];
+        const existingRollSet = new Set(existingStudents.map((student) => normalizeRoll(student.roll)));
+        const seenInFile = new Set();
+        const toInsert = [];
+        let duplicateCount = 0;
+
+        for (const entry of preparedRows) {
+            const roll = entry.doc.roll;
+            if (seenInFile.has(roll)) {
+                duplicateCount += 1;
+                failedRows.push({
+                    lineNumber: entry.lineNumber,
+                    roll,
+                    reason: 'Duplicate roll in the uploaded CSV.'
+                });
+                continue;
+            }
+            seenInFile.add(roll);
+
+            if (existingRollSet.has(roll)) {
+                duplicateCount += 1;
+                failedRows.push({
+                    lineNumber: entry.lineNumber,
+                    roll,
+                    reason: 'Student already exists.'
+                });
+                continue;
+            }
+
+            const salt = await bcrypt.genSalt(10);
+            const hashedPwd = await bcrypt.hash(entry.doc.password, salt);
+            toInsert.push({ ...entry.doc, password: hashedPwd });
+        }
+
+        if (toInsert.length) {
+            await Student.insertMany(toInsert);
+        }
+
+        return res.status(200).json({
+            msg: `CSV processed. Inserted ${toInsert.length} students.`,
+            summary: {
+                totalRows: rows.length,
+                insertedCount: toInsert.length,
+                failedCount: failedRows.length,
+                duplicateCount
+            },
+            failedRows
+        });
+    } catch (error) {
+        console.log('CSV upload error: ', error);
+        return res.status(500).json({ msg: 'Database error' });
+    }
+};
 
 module.exports.getSubjByYear = async (req, res) => {
     const { teacher_id, course, year, branch, semester } = req.body;

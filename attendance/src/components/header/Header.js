@@ -6,7 +6,8 @@ import GuestAttendance from "../Student/GuestAttendance";
 
 const teacherLinks = [
   { to: "/teacher", label: "Dashboard" },
-  { to: "/takeAttendance", label: "Take Attendance" }
+  { to: "/takeAttendance", label: "Take Attendance" },
+  { to: "/uploadStudents", label: "Upload Students" }
 ];
 
 const adminLinks = [

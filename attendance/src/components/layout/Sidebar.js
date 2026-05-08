@@ -6,6 +6,7 @@ import BookIcon from '@mui/icons-material/Book'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import CloseIcon from '@mui/icons-material/Close'
+import UploadFileIcon from '@mui/icons-material/UploadFile'
 import { getAuthSession } from '../../utils/auth'
 
 const Sidebar = ({ open = false, onClose = () => {} }) => {
@@ -15,6 +16,7 @@ const Sidebar = ({ open = false, onClose = () => {} }) => {
   const teacherLinks = [
     { to: '/teacher', label: 'Dashboard', icon: <DashboardIcon /> },
     { to: '/takeAttendance', label: 'Take Attendance', icon: <EventAvailableIcon /> },
+    { to: '/uploadStudents', label: 'Upload Students', icon: <UploadFileIcon /> },
   ]
 
   const adminLinks = [

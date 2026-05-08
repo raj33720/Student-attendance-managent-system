@@ -10,6 +10,7 @@ import AdminLogin from './components/Admin/Login';
 import ViewSubjs from './components/Subjects/ViewSubjs';
 import TakeAttendance from './components/Teacher/TakeAttendance';
 import ViewAttendance from './components/Teacher/ViewAttendance';
+import UploadStudentsCsv from './components/Teacher/UploadStudentsCsv';
 import SubjAttend from './components/Student/SubjAttend';
 import ViewAttendanceAdm from './components/Admin/ViewAttendance';
 import ViewStudAtten from './components/Teacher/ViewStudAtten';
@@ -33,6 +34,7 @@ function App() {
             <Route path="/teacher" element={<Teacher />} />
             <Route path="/takeAttendance" element={<TakeAttendance />} />
             <Route path="/viewAttendance" element={<ViewAttendance />} />
+            <Route path="/uploadStudents" element={<UploadStudentsCsv />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['student']} />}>

@@ -8,7 +8,8 @@ const {
     takeAttendance,
     getAttendanceBySubject,
     updateAttendance,
-    getTeacherDashboardSummary
+    getTeacherDashboardSummary,
+    uploadStudentsCsv
 } = require('../controllers/TeacherController');
 const bodyParser = require('body-parser');
 const Auth = require('../utils/Auth');
@@ -24,4 +25,5 @@ router.post('/takeAttendance',Auth(['teacher']),takeAttendance);
 router.post('/updateAttendance',Auth(['teacher', 'admin']),updateAttendance);
 router.post('/getAttendanceBySubject',Auth(['teacher', 'admin']),getAttendanceBySubject);
 router.post('/getTeacherDashboardSummary',Auth(['teacher', 'admin']), getTeacherDashboardSummary);
+router.post('/uploadStudentsCsv', Auth(['teacher']), uploadStudentsCsv);
 module.exports=router;
