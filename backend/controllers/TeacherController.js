@@ -20,6 +20,7 @@ const {
 } = require('../utils/normalization');
 
 const secretKey = process.env.SECRET_KEY;
+const tokenExpiry = process.env.JWT_EXPIRES_IN || '12h';
 
 module.exports.registerTeacher = async (req, res) => {
     const { name, email, contact, branch, password } = req.body;
@@ -40,8 +41,9 @@ module.exports.registerTeacher = async (req, res) => {
             password: hashedPwd
         });
         const token = jwt.sign(
-            { id: teacher._id.toString(), name: teacher.name, email: teacher.email, branch: teacher.branch },
-            secretKey
+            { id: teacher._id.toString(), name: teacher.name, email: teacher.email, branch: teacher.branch, role: 'teacher' },
+            secretKey,
+            { expiresIn: tokenExpiry }
         );
         return res.status(200).json({ "res": token, "msg": "Registered Succesfully!!" });
     } catch (error) {
@@ -62,8 +64,9 @@ module.exports.loginTeacher = async (req, res) => {
             return res.status(203).json({ "msg": "Invalid Credentials" })
         }
         const token = jwt.sign(
-            { id: teacher._id.toString(), name: teacher.name, email: teacher.email, branch: teacher.branch },
-            secretKey
+            { id: teacher._id.toString(), name: teacher.name, email: teacher.email, branch: teacher.branch, role: 'teacher' },
+            secretKey,
+            { expiresIn: tokenExpiry }
         );
         return res.status(200).json({ "msg": "Logged in succesfully!!.", "data": token })
     } catch (error) {

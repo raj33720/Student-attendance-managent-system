@@ -17,8 +17,9 @@ const {
 } = require('../utils/normalization');
 
 const USERNAME = "admin";
-const PWD = "admin";
+const PWD = "123456";
 const secretKey = process.env.SECRET_KEY;
+const tokenExpiry = process.env.JWT_EXPIRES_IN || '12h';
 
 module.exports.loginAdmin = async(req, res) => {
     console.log("Inside Controller")
@@ -26,7 +27,7 @@ module.exports.loginAdmin = async(req, res) => {
     console.log("req body : ", req.body);
     if (username == USERNAME && password == PWD) {
         // const resData = JSON.stringify(response[0]);
-        var token = jwt.sign(req.body, secretKey);
+        const token = jwt.sign({ username, role: 'admin' }, secretKey, { expiresIn: tokenExpiry });
         return res.status(200).json({ "msg": "Logged in succesfully!!.", "data": token })
     } else {
         return res.status(203).json({ "msg": "Invalid Credentials" })

@@ -18,10 +18,10 @@ const Auth = require('../utils/Auth');
 router.use(bodyParser.urlencoded({ extended: false }))
 router.post('/registerTeacher',registerTeacher);
 router.post('/loginTeacher',loginTeacher);
-router.post('/getSubjByYear',getSubjByCourse);
-router.post('/getStudentsBySubject',getStudentsBySubject);
-router.post('/takeAttendance',takeAttendance);
-router.post('/updateAttendance',updateAttendance);
-router.post('/getAttendanceBySubject',getAttendanceBySubject);
-router.post('/getTeacherDashboardSummary', getTeacherDashboardSummary);
+router.post('/getSubjByYear',Auth(['teacher', 'admin']),getSubjByCourse);
+router.post('/getStudentsBySubject',Auth(['teacher', 'admin']),getStudentsBySubject);
+router.post('/takeAttendance',Auth(['teacher']),takeAttendance);
+router.post('/updateAttendance',Auth(['teacher', 'admin']),updateAttendance);
+router.post('/getAttendanceBySubject',Auth(['teacher', 'admin']),getAttendanceBySubject);
+router.post('/getTeacherDashboardSummary',Auth(['teacher', 'admin']), getTeacherDashboardSummary);
 module.exports=router;

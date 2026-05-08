@@ -6,10 +6,11 @@ import BookIcon from '@mui/icons-material/Book'
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import ListAltIcon from '@mui/icons-material/ListAlt'
 import CloseIcon from '@mui/icons-material/Close'
+import { getAuthSession } from '../../utils/auth'
 
 const Sidebar = ({ open = false, onClose = () => {} }) => {
   const location = useLocation()
-  const type = typeof window !== 'undefined' ? localStorage.getItem('type') : null
+  const { role } = getAuthSession()
 
   const teacherLinks = [
     { to: '/teacher', label: 'Dashboard', icon: <DashboardIcon /> },
@@ -29,7 +30,7 @@ const Sidebar = ({ open = false, onClose = () => {} }) => {
     { to: '/subjattendance', label: 'My Attendance', icon: <ListAltIcon /> },
   ]
 
-  const links = type === 'teacher' ? teacherLinks : type === 'admin' ? adminLinks : type === 'student' ? studentLinks : []
+  const links = role === 'teacher' ? teacherLinks : role === 'admin' ? adminLinks : role === 'student' ? studentLinks : []
 
   return (
     <>

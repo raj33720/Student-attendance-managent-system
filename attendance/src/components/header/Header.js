@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { clearAuthSession } from "../../utils/auth";
+import { clearAuthSession, getAuthSession } from "../../utils/auth";
 import GuestAttendance from "../Student/GuestAttendance";
 
 const teacherLinks = [
@@ -23,7 +23,8 @@ const Header = () => {
   const [profileType, setProfileType] = useState(null);
 
   useEffect(() => {
-    setProfileType(localStorage.getItem("type"));
+    const { role } = getAuthSession();
+    setProfileType(role);
   }, [location.pathname]);
 
   const handleLogout = () => {
@@ -35,8 +36,8 @@ const Header = () => {
   const [showGuestModal, setShowGuestModal] = useState(false);
 
   const handleMyAttendance = () => {
-    const type = localStorage.getItem('type');
-    if (type === 'student') {
+    const { role } = getAuthSession();
+    if (role === 'student') {
       navigate('/subjattendance');
       return;
     }

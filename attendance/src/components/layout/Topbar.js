@@ -5,27 +5,20 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import MenuIcon from '@mui/icons-material/Menu'
 import LogoutIcon from '@mui/icons-material/Logout'
 import { useNavigate } from 'react-router-dom'
-import jwt_decode from 'jwt-decode'
-import { clearAuthSession } from '../../utils/auth'
+import { clearAuthSession, getAuthSession } from '../../utils/auth'
 
 const Topbar = ({ onMenuToggle }) => {
   const navigate = useNavigate()
   const profileName = useMemo(() => {
-    const token = localStorage.getItem('token')
-    if (!token) return 'User'
-    try {
-      const decoded = jwt_decode(token)
-      return decoded?.name || decoded?.roll || 'User'
-    } catch (error) {
-      return 'User'
-    }
+    const { user } = getAuthSession()
+    return user?.name || user?.roll || 'User'
   }, [])
 
   const handleProfileClick = () => {
-    const type = localStorage.getItem('type')
-    if (type === 'student') navigate('/student')
-    else if (type === 'teacher') navigate('/teacher')
-    else if (type === 'admin') navigate('/admin')
+    const { role } = getAuthSession()
+    if (role === 'student') navigate('/student')
+    else if (role === 'teacher') navigate('/teacher')
+    else if (role === 'admin') navigate('/admin')
   }
 
   const handleLogout = () => {

@@ -19,6 +19,7 @@ const {
 } = require('../utils/normalization');
 
 const secretKey = process.env.SECRET_KEY;
+const tokenExpiry = process.env.JWT_EXPIRES_IN || '12h';
 
 module.exports.registerStudent = async(req, res) => {
     const { name, roll, course } = req.body;
@@ -52,9 +53,11 @@ module.exports.registerStudent = async(req, res) => {
                 course: student.course,
                 year: student.year,
                 semester: student.semester,
-                branch: student.branch
+                branch: student.branch,
+                role: 'student'
             },
-            secretKey
+            secretKey,
+            { expiresIn: tokenExpiry }
         );
         return res.status(200).json({
             msg: "Student registered successfully",
@@ -87,9 +90,11 @@ module.exports.loginStudent = async(req, res) => {
                 course: student.course,
                 year: student.year,
                 semester: student.semester,
-                branch: student.branch
+                branch: student.branch,
+                role: 'student'
             },
-            secretKey
+            secretKey,
+            { expiresIn: tokenExpiry }
         );
         return res.status(200).json({
             msg: "Login successful",

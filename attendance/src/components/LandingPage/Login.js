@@ -177,7 +177,7 @@ const Login = () => {
 
                                 <p className="text-center text-gray-600">
                                     Don&apos;t have an account?{' '}
-                                    <Link component={RouterLink} to="/registerTeacher">
+                                    <Link component={RouterLink} to="/registerTeacher" sx={{ color: '#059669', fontWeight: 'bold' }}>
                                         Register Now
                                     </Link>
                                 </p>
