@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Header from '../header/Header'
 import { useLocation } from 'react-router-dom';
 import { path } from '../../path'
@@ -22,11 +22,10 @@ const ViewSubjAttendance = () => {
         }
     }, [subject, navigate]);
 
-    const getAttendanceBySubject = async () => {
+    const getAttendanceBySubject = useCallback(async () => {
         if (!subject) {
             return;
         }
-        console.log("Subject : ",subject.subject)
         if (subject) {
             axios.post(`${path}/getAttendanceBySubject`, {
                 course: subject.course,
@@ -35,7 +34,7 @@ const ViewSubjAttendance = () => {
             })
                 .then(function (response) {
                     console.log("Res: ", response);
-                    if (response.status == 203) {
+                    if (response.status === 203) {
                         // toast.error(response.data.msg);
                     }
                     else {
@@ -58,11 +57,11 @@ const ViewSubjAttendance = () => {
         }
         console.log("Handle submit ");
         console.log("Path ", path);
-    }
+    }, [subject]);
 
     useEffect(() => {
         getAttendanceBySubject();
-    }, [subject]);
+    }, [getAttendanceBySubject]);
 
     if (!subject) {
         return null;
@@ -126,10 +125,10 @@ const ViewSubjAttendance = () => {
                                                         students.map((st) => {
                                                             var p = 0, a = 0, l = 0, perc = 0;
                                                             (st.attendance).forEach((e) => {
-                                                                if (e.status == 'present') {
+                                                                if (e.status === 'present') {
                                                                     p = p + 1;
                                                                 }
-                                                                else if (e.status == 'absent') {
+                                                                else if (e.status === 'absent') {
                                                                     a = a + 1;
                                                                 }
                                                                 else {

@@ -8,11 +8,8 @@ const axios = require('axios')
 const ViewAttendanceAdm = () => {
     const navigate = useNavigate();
     const [course, setcourse] = useState("");
-    const [dept, setdept] = useState("");
     const [year, setyear] = useState("");
     const [subjects, setsubjects] = useState([]);
-    const [students, setstudents] = useState([]);
-    const [subject, setsubject] = useState("");
 
     const btechyear = [['1', '1st Year'], ['2', '2nd Year'], ['3', '3rd Year'], ['4', '4th Year']];
     const mtechyear = [['1', '1st Year'], ['2', '2nd Year']];
@@ -30,7 +27,7 @@ const ViewAttendanceAdm = () => {
         await axios.post(`${path}/getAllSubj`)
             .then(function (response) {
                 console.log("Res: ", response);
-                if (response.status == 203) {
+                if (response.status === 203) {
                     // toast.error(response.data.msg);
                     setsubjects([])
                 }
@@ -52,7 +49,7 @@ const ViewAttendanceAdm = () => {
         })
             .then(function (response) {
                 console.log("Res: ", response);
-                if (response.status == 203) {
+                if (response.status === 203) {
                     // toast.error(response.data.msg);
                     setsubjects([])
                 }
@@ -106,15 +103,12 @@ const ViewAttendanceAdm = () => {
                                             className='w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline'>
                                             <option >Select Year</option>
                                             {
-                                                console.log("course: ", course)
-                                            }
-                                            {
-                                                course == "btech" && btechyear.map((y) => {
+                                                course === "btech" && btechyear.map((y) => {
                                                     return <option value={y[0]}>{y[1]}</option>
                                                 })
                                             }
                                             {
-                                                course == "mtech" && mtechyear.map((y) => {
+                                                course === "mtech" && mtechyear.map((y) => {
                                                     return <option value={y[0]}>{y[1]}</option>
                                                 })
                                             }

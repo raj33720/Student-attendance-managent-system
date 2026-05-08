@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Header from '../header/Header'
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
@@ -8,11 +8,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import { ToastContainer, toast } from 'react-toastify';
@@ -91,7 +89,7 @@ const ViewSubjs = () => {
             })
                 .then(function (response) {
                     console.log("Res: ", response);
-                    if (response.status == 203) {
+                    if (response.status === 203) {
                         toast.error(response.data.msg);
                     }
                     else {
@@ -129,7 +127,7 @@ const ViewSubjs = () => {
             })
                 .then(function (response) {
                     console.log("Res: ", response);
-                    if (response.status == 203) {
+                    if (response.status === 203) {
                         toast.error(response.data.msg);
                     }
                     else {
@@ -167,7 +165,7 @@ const ViewSubjs = () => {
             })
                 .then(function (response) {
                     console.log("Res: ", response);
-                    if (response.status == 203) {
+                    if (response.status === 203) {
                         toast.error(response.data.msg);
                     }
                     else {
@@ -187,22 +185,21 @@ const ViewSubjs = () => {
             toast.warn("Opps!! Cannot delete this Subject")
         }
     }
-    const getAllSubj = async () => {
+    const getAllSubj = useCallback(async () => {
 
         axios.post(`${path}/getAllSubj`, {})
             .then(function (response) {
                 console.log("Res: ", response);
-                if (response.status == 203) {
+                if (response.status === 203) {
                     console.log("No data found!!")
                 }
                 else {
-                    var r = [];
+                    const r = [];
                     console.log("res: ", response.data.data);
-                    response.data.data.map((s) => {
+                    response.data.data.forEach((s) => {
                         r.push(createData(s.name, s.code, s.teacher_id, s.course, s.year, s.branch, s.semester, s.id))
                     })
                     setrows(r);
-                    console.log("Rows: ", rows)
                 }
             })
             .catch(function (error) {
@@ -212,7 +209,7 @@ const ViewSubjs = () => {
         console.log("Handle submit ");
         console.log("Path ", path);
 
-    }
+    }, []);
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -224,7 +221,7 @@ const ViewSubjs = () => {
 
     useEffect(() => {
         getAllSubj();
-    }, []);
+    }, [getAllSubj]);
     return (
         <div>
             <Header />
@@ -384,12 +381,12 @@ const ViewSubjs = () => {
                                             className='w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline'>
                                             <option >Select branch</option>
                                             {
-                                                course == 'btech' && btechDept.map((dept) => {
+                                                course === 'btech' && btechDept.map((dept) => {
                                                     return <option value={dept[0]}>{dept[1]}</option>
                                                 })
                                             }
                                             {
-                                                course == 'mtech' && mtechDept.map((dept) => {
+                                                course === 'mtech' && mtechDept.map((dept) => {
                                                     return <option value={dept[0]}>{dept[1]}</option>
                                                 })
                                             }
@@ -515,12 +512,12 @@ const ViewSubjs = () => {
                                             className='w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline'>
                                             <option >Select branch</option>
                                             {
-                                                course == 'btech' && btechDept.map((dept) => {
+                                                course === 'btech' && btechDept.map((dept) => {
                                                     return <option value={dept[0]}>{dept[1]}</option>
                                                 })
                                             }
                                             {
-                                                course == 'mtech' && mtechDept.map((dept) => {
+                                                course === 'mtech' && mtechDept.map((dept) => {
                                                     return <option value={dept[0]}>{dept[1]}</option>
                                                 })
                                             }

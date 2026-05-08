@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Header from '../header/Header'
 import { useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
 import { path } from '../../path'
 import jwt_decode from "jwt-decode";
-import Footer from '../Footer/Footer';
 
 const axios = require('axios')
 
@@ -16,17 +14,14 @@ const ViewAttendance = () => {
     const [students, setstudents] = useState([]);
     const [subject, setsubject] = useState("");
     const [subjectName, setsubjectName] = useState("");
-    const [showRecord, setshowRecord] = useState(false);
     const [beginDate, setbeginDate] = useState();
     const [endDate, setendDate] = useState();
 
 
 
     const navigate = useNavigate();
-    if (localStorage.getItem('token')) {
-        const token = localStorage.getItem('token');
-        var teacher = jwt_decode(token);
-    }
+    const token = localStorage.getItem('token');
+    const teacher = token ? jwt_decode(token) : null;
 
     // dfk
 
@@ -40,18 +35,17 @@ const ViewAttendance = () => {
         setyear("");
         setsubject("");
     }
-    const getSubjListByYear = async () => {
+    const getSubjListByYear = useCallback(async () => {
         if (course.length && year.length && branch.length) {
-
             axios.post(`${path}/getSubjByYear`, {
                 course: course,
                 year: year,
                 branch: branch,
-                teacher_id: teacher.id
+                teacher_id: teacher?.id
             })
                 .then(function (response) {
                     console.log("Res: ", response);
-                    if (response.status == 203) {
+                    if (response.status === 203) {
                         // toast.error(response.data.msg);
                         setsubjects([])
                     }
@@ -70,8 +64,8 @@ const ViewAttendance = () => {
         }
         console.log("Handle submit ");
         console.log("Path ", path);
-    }
-    const getAttendanceBySubject = async () => {
+    }, [branch, course, teacher?.id, year]);
+    const getAttendanceBySubject = useCallback(async () => {
         if (course.length && year.length && branch.length) {
             axios.post(`${path}/getAttendanceBySubject`, {
                 course: course,
@@ -81,7 +75,7 @@ const ViewAttendance = () => {
             })
                 .then(function (response) {
                     console.log("Res: ", response);
-                    if (response.status == 203) {
+                    if (response.status === 203) {
                         // toast.error(response.data.msg);
                     }
                     else {
@@ -104,14 +98,14 @@ const ViewAttendance = () => {
         }
         console.log("Handle submit ");
         console.log("Path ", path);
-    }
+    }, [branch, course, subject, year]);
     useEffect(() => {
         getSubjListByYear();
-    }, [course, year, branch]);
+    }, [getSubjListByYear]);
 
     useEffect(() => {
         getAttendanceBySubject();
-    }, [subject]);
+    }, [getAttendanceBySubject]);
     return (
         <div>
             <Header />
@@ -178,15 +172,12 @@ const ViewAttendance = () => {
                                             className='w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline'>
                                             <option >Select Year</option>
                                             {
-                                                console.log("course: ", course)
-                                            }
-                                            {
-                                                course == "btech" && btechyear.map((y) => {
+                                                course === "btech" && btechyear.map((y) => {
                                                     return <option value={y[0]}>{y[1]}</option>
                                                 })
                                             }
                                             {
-                                                course == "mtech" && mtechyear.map((y) => {
+                                                course === "mtech" && mtechyear.map((y) => {
                                                     return <option value={y[0]}>{y[1]}</option>
                                                 })
                                             }
@@ -203,11 +194,8 @@ const ViewAttendance = () => {
                                             value={subject}
                                             onChange={(e) => {
                                                 setsubject(e.target.value);
-                                                var sub = subjects.find((s) => {
-                                                    if (s.code == e.target.value) {
-                                                        return true;
-                                                    }
-                                                }).name;
+                                                const selectedSubject = subjects.find((s) => s.code === e.target.value);
+                                                const sub = selectedSubject ? selectedSubject.name : '';
                                                 setsubjectName(sub)
                                             }}
                                             className='w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline'>
@@ -281,10 +269,10 @@ const ViewAttendance = () => {
                                                         students.map((st) => {
                                                             var p = 0, a = 0, l = 0, perc = 0;
                                                             (st.attendance).forEach((e) => {
-                                                                if (e.status == 'present') {
+                                                                if (e.status === 'present') {
                                                                     p = p + 1;
                                                                 }
-                                                                else if (e.status == 'absent') {
+                                                                else if (e.status === 'absent') {
                                                                     a = a + 1;
                                                                 }
                                                                 else {

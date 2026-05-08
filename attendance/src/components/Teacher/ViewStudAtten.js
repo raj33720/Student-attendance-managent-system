@@ -37,19 +37,6 @@ const ViewStudAtten = () => {
     const endDate = attendance.length
         ? new Date(attendance[0].date).toLocaleDateString('en-GB')
         : '-';
-    var p = 0, a = 0, l = 0, perc = 0;
-    (attendance).forEach((e) => {
-        if (e.status == 'present') {
-            p = p + 1;
-        }
-        else if (e.status == 'absent') {
-            a = a + 1;
-        }
-        else {
-            l = l + 1;
-        }
-    })
-    perc = p + a + l > 0 ? (p / (p + a + l) * 100) : 0;
     var sn = 1;
 
     const handleUpdateSubmit = async () => {
@@ -61,7 +48,7 @@ const ViewStudAtten = () => {
             })
                 .then(function (response) {
                     console.log("Res: ", response);
-                    if (response.status == 203) {
+                    if (response.status === 203) {
                         toast.error(response.data.msg);
                     }
                     else {

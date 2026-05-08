@@ -8,14 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Button from '@mui/material/Button';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { path } from '../../path'
 
 const axios = require('axios')
@@ -52,17 +45,15 @@ const ViewProffessors = () => {
         await axios.post(`${path}/getTeachers`)
             .then(function (response) {
                 console.log("Res: ", response);
-                if (response.status == 203) {
+                if (response.status === 203) {
                     // toast.error(response.data.msg);
                     setrows([])
                 }
                 else {
                     console.log("resp stud : ", response);
-                    var r = [];
-                    // name, branch,teacherId, email
-                    response.data.data.map((s) => {
-                        r.push(createData(s.name, s.branch, s.id, s.email, s.contact))
-                    })
+                    const r = (response.data.data || []).map((s) =>
+                        createData(s.name, s.branch, s.id, s.email, s.contact)
+                    );
                     setrows(r);
                 }
             })
@@ -103,7 +94,7 @@ const ViewProffessors = () => {
                                 </TableHead>
                                 <TableBody>
                                     {rows.length > 0 && rows.map((row) => (
-                                        <StyledTableRow key={row.id}>
+                                        <StyledTableRow key={row.teacherId}>
                                             <StyledTableCell align='left' component="th" scope="row">
                                                 {row.name}
                                             </StyledTableCell>
@@ -116,7 +107,7 @@ const ViewProffessors = () => {
                                         </StyledTableRow>
                                     ))}
                                     {
-                                        rows.length == 0 && <h2>No Students Found!!</h2>
+                                        rows.length === 0 && <h2>No Students Found!!</h2>
                                     }
                                 </TableBody>
                             </Table>
