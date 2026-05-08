@@ -78,6 +78,7 @@ Create/update `backend/.env`:
 ```env
 MONGO_URI=your_mongodb_connection_string
 SECRET_KEY=your_secure_jwt_secret
+JWT_EXPIRES_IN=12h
 PORT=5000
 ```
 
@@ -119,7 +120,7 @@ These scripts generate normalized subjects/students across branches and semester
 ## Default Admin Login
 
 - Username: `admin`
-- Password: `admin`
+- Password: `123456`
 
 (Defined in `backend/controllers/AdminController.js`)
 
@@ -195,15 +196,6 @@ All routes are prefixed with `/api`.
 - `npm run build` - production build
 - `npm test` - run tests
 
-## Screenshots
-
-Available inside `Screenshots/`:
-- `Login.png`
-- `Teacher Dashboard.png`
-- `Take attendance.png`
-- `Student Dashboard.png`
-- `Student Attendance View.png`
-- `Subjects admin.png`
 
 ## Security Notes
 
