@@ -9,6 +9,7 @@ This project lets teachers take attendance by course/year/semester/subject, stud
 - Role-based authentication (`student`, `teacher`, `admin`)
 - Teacher dashboard with branch-wise student attendance summary
 - Attendance flow: `Course -> Year -> Semester -> Subject -> Students`
+- Teacher bulk student onboarding via CSV upload with validation and duplicate checks
 - Student dashboard with subject list and percentage summary
 - Student "My Attendance" page with subject selector, chart, and full record table
 - Admin management for subjects, students, teachers, and reports
@@ -141,6 +142,7 @@ These scripts generate normalized subjects/students across branches and semester
 
 - Login as teacher
 - Dashboard shows branch-wise students and attendance percentage
+- Open **Upload Students** to add students in bulk using CSV
 - Go to **Take Attendance**
 - Select `course -> year -> semester -> subject`
 - Mark attendance and submit
@@ -171,6 +173,53 @@ All routes are prefixed with `/api`.
 - `POST /updateAttendance`
 - `POST /getAttendanceBySubject`
 - `POST /getTeacherDashboardSummary`
+- `POST /uploadStudentsCsv`
+
+## CSV Upload Feature (Teacher)
+
+Teachers can upload students in bulk from the **Upload Students** page.
+
+- UI route: `/uploadStudents`
+- API route: `POST /api/uploadStudentsCsv`
+- Auth: teacher JWT required
+
+### Required CSV columns
+
+- `name`
+- `roll`
+
+### Optional CSV columns
+
+- `branch`
+- `course`
+- `year`
+- `semester`
+- `email`
+- `contact`
+- `password`
+
+If optional fields are missing, backend applies defaults from teacher branch + selected defaults on UI.
+
+### CSV header aliases supported
+
+- `roll`: `roll`, `rollno`, `rollnumber`, `enrollment`, `enrollmentno`, `enrollmentnumber`
+- `name`: `name`, `studentname`, `fullname`
+- `semester`: `semester`, `sem`
+- `branch`: `branch`, `department`, `dept`
+- `contact`: `contact`, `contactno`, `contactnumber`, `phone`, `mobile`
+
+### Validation and response
+
+- Rejects empty CSV and CSV without data rows
+- Rejects when required columns are missing
+- Rejects duplicate roll numbers inside the same CSV
+- Skips students already present in DB (based on roll)
+- Returns summary:
+  - `totalRows`
+  - `insertedCount`
+  - `failedCount`
+  - `duplicateCount`
+  - `failedRows` with line number + reason
 
 ### Admin routes
 - `POST /loginAdmin`
